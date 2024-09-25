@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Services\CsvService;
 use App\Services\JsonService;
 use Illuminate\Http\Request;
 
@@ -14,10 +15,13 @@ class StringController extends Controller
             $data = $request->all();
             $type = $data['type'];
             $entity = $data['entity'];
+            $gameType = $data['gameType'];
             $function = $type . $entity;
 
-            $jsonService = new JsonService($data['base'], $data['translation']);
-            $result = $jsonService->$function();
+            $service = $gameType === "sdv"
+                ? new JsonService($data['base'], $data['translation'])
+                : new CsvService($data['base'], $data['translation']);
+            $result = $service->$function();
         } catch (\Throwable $th) {
             return response()->json(['error' => $th->getMessage(), 'trace' => $th->getTrace()], 400);
         }
